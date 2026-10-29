@@ -1,0 +1,13 @@
+data/*.db
+data/*.db-*
+backups/*
+exports/*
+node_modules/
+!backups/.gitkeep
+!exports/.gitkeep
+__pycache__/
+*.pyc
+.DS_Store
+.claude/
+.impeccable/
+*.db-journal
