@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Student Attendance & Defaulter DBMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <div class="brand-icon">🎓</div>
+                <div>
+                    <h1 class="brand-title">CAMPUS<span>DBMS</span></h1>
+                    <p class="brand-subtitle">Student Attendance & Defaulter Management System</p>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="db-status-badge" id="dbStatus">
+                    <span class="pulse-dot"></span>
+                    <span id="dbStatusText">Connecting Database...</span>
+                </div>
+
+                <div class="faculty-profile" id="facultyProfile">
+                    <div class="faculty-avatar">👨‍🏫</div>
+                    <div class="faculty-info">
+                        <span class="faculty-name" id="navFacultyName">Dr. Ramesh Sharma</span>
+                        <span class="faculty-role" id="navFacultyDept">Computer Science (FAC101)</span>
+                    </div>
+                    <button class="btn btn-sm btn-outline" id="switchFacultyBtn">Switch User</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <div class="nav-container">
+                <button class="tab-btn active" data-tab="attendance-tab">
+                    <span class="tab-icon">📋</span> Mark Attendance
+                </button>
+                <button class="tab-btn" data-tab="summary-tab">
+                    <span class="tab-icon">📊</span> Attendance Sheet & Analytics
+                </button>
+                <button class="tab-btn" data-tab="defaulters-tab">
+                    <span class="tab-icon">⚠️</span> Defaulter / Detention List
+                </button>
+                <button class="tab-btn" data-tab="tables-tab">
+                    <span class="tab-icon">🗄️</span> SQL Tables Explorer
+                </button>
+                <button class="tab-btn" data-tab="sql-tab">
+                    <span class="tab-icon">⚡</span> Run SQL Query
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="main-container">
+        
+        <!-- Toast Notification -->
+        <div id="toast" class="toast"></div>
+
+        <!-- ============================================================ -->
+        <!-- TAB 1: MARK ATTENDANCE -->
+        <!-- ============================================================ -->
+        <section id="attendance-tab" class="tab-content active">
+            <div class="content-card">
+                <div class="card-header">
+                    <div>
+                        <h2>Teacher Attendance Sheet</h2>
+                        <p class="text-muted">Select subject and date to mark student daily attendance</p>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="subjectSelect">Subject:</label>
+                            <select id="subjectSelect" class="form-control">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="attendanceDate">Date:</label>
+                            <input type="date" id="attendanceDate" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <div class="quick-action-bar">
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary btn-sm" id="markAllPresentBtn">✅ Mark All Present</button>
+                        <button class="btn btn-secondary btn-sm" id="markAllAbsentBtn">❌ Mark All Absent</button>
+                    </div>
+                    <div class="attendance-counter">
+                        <span class="badge badge-success" id="presentCount">Present: 0</span>
+                        <span class="badge badge-danger" id="absentCount">Absent: 0</span>
+                        <span class="badge badge-neutral" id="totalStudentsCount">Total: 0</span>
+                    </div>
+                </div>
+
+                <!-- Students Table -->
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Roll No</th>
+                                <th>Student Name</th>
+                                <th>Gender</th>
+                                <th>Blood Group</th>
+                                <th>Branch</th>
+                                <th>Year</th>
+                                <th style="text-align: center;">Attendance Status (1 / 0)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-footer">
+                    <button class="btn btn-primary btn-lg" id="submitAttendanceBtn">
+                        💾 Save Attendance to Database
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- TAB 2: ATTENDANCE SUMMARY & ANALYTICS -->
+        <!-- ============================================================ -->
+        <section id="summary-tab" class="tab-content">
+            <!-- Stats KPI Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon bg-blue">👥</div>
+                    <div class="stat-details">
+                        <span class="stat-label">Total Students</span>
+                        <h3 class="stat-value" id="kpiTotalStudents">7</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-green">📈</div>
+                    <div class="stat-details">
+                        <span class="stat-label">Average Attendance</span>
+                        <h3 class="stat-value" id="kpiAvgAttendance">65.7%</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-red">⚠️</div>
+                    <div class="stat-details">
+                        <span class="stat-label">Defaulters (&lt; 75%)</span>
+                        <h3 class="stat-value text-red" id="kpiTotalDefaulters">3</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-purple">📚</div>
+                    <div class="stat-details">
+                        <span class="stat-label">Total Subjects</span>
+                        <h3 class="stat-value" id="kpiTotalSubjects">4</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-header">
+                    <div>
+                        <h2>Student-wise Attendance Overview</h2>
+                        <p class="text-muted">Calculated using aggregated SQL queries over the `attendance` table</p>
+                    </div>
+                    <div class="filter-group">
+                        <input type="text" id="summarySearch" class="form-control" placeholder="Search roll no or name...">
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Roll No</th>
+                                <th>Student Name</th>
+                                <th>Branch</th>
+                                <th>Year</th>
+                                <th>Total Classes</th>
+                                <th>Attended</th>
+                                <th>Absent</th>
+                                <th>Attendance %</th>
+                                <th>Eligibility Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summaryTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- TAB 3: DEFAULTER / DETENTION LIST -->
+        <!-- ============================================================ -->
+        <section id="defaulters-tab" class="tab-content">
+            <div class="content-card">
+                <div class="card-header">
+                    <div>
+                        <h2>⚠️ Official Detention / Defaulter List</h2>
+                        <p class="text-muted">Students falling below mandatory 75% attendance threshold</p>
+                    </div>
+                    <div class="form-row">
+                        <button class="btn btn-danger" id="recalcDefaultersBtn">
+                            🔄 Auto-Generate Defaulters (&lt; 75%)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning">
+                    <strong>College Policy:</strong> Students having attendance strictly below <strong>75.00%</strong> are automatically flagged in the detention list for parent notification and remedial classes.
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Detention ID</th>
+                                <th>Roll No</th>
+                                <th>Student Name</th>
+                                <th>Branch</th>
+                                <th>Subject</th>
+                                <th>Faculty In-Charge</th>
+                                <th>Attendance %</th>
+                                <th>Status Action</th>
+                                <th>Date Flagged</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="defaultersTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- TAB 4: SQL TABLES EXPLORER (FOR LAB EVALUATION) -->
+        <!-- ============================================================ -->
+        <section id="tables-tab" class="tab-content">
+            <div class="content-card">
+                <div class="card-header">
+                    <div>
+                        <h2>🗄️ Relational Database Table Inspector</h2>
+                        <p class="text-muted">Inspect raw records of all 5 tables from the ER Diagram</p>
+                    </div>
+                    <div class="table-selector-tabs" id="tableSelectorTabs">
+                        <button class="btn btn-outline active" data-table="student">student</button>
+                        <button class="btn btn-outline" data-table="faculty">faculty</button>
+                        <button class="btn btn-outline" data-table="subject">subject</button>
+                        <button class="btn btn-outline" data-table="attendance">attendance</button>
+                        <button class="btn btn-outline" data-table="defaulter_list">defaulter_list</button>
+                    </div>
+                </div>
+
+                <div class="table-meta-box" id="tableMetaBox">
+                    <span class="badge badge-info" id="currentTableBadge">Table: student</span>
+                    <span class="text-muted" id="currentTableCount">0 rows</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table" id="rawDataTable">
+                        <thead id="rawTableHead"></thead>
+                        <tbody id="rawTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- TAB 5: RUN CUSTOM SQL QUERY -->
+        <!-- ============================================================ -->
+        <section id="sql-tab" class="tab-content">
+            <div class="content-card">
+                <div class="card-header">
+                    <div>
+                        <h2>⚡ Interactive SQL Console</h2>
+                        <p class="text-muted">Execute live SQL queries against the relational schema</p>
+                    </div>
+                </div>
+
+                <div class="query-samples">
+                    <span class="sample-label">Quick Queries:</span>
+                    <button class="btn btn-sm btn-secondary sample-sql" data-sql="SELECT * FROM student WHERE branch = 'Computer Science';">CS Students</button>
+                    <button class="btn btn-sm btn-secondary sample-sql" data-sql="SELECT s.roll_no, s.name, COUNT(a.attendance_id) as total, SUM(a.status) as attended FROM student s JOIN attendance a ON s.roll_no = a.roll_no GROUP BY s.roll_no;">Calculate Attendance</button>
+                    <button class="btn btn-sm btn-secondary sample-sql" data-sql="SELECT sub.subject_name, f.name as teacher FROM subject sub JOIN faculty f ON sub.faculty_id = f.faculty_id;">Subject Teachers</button>
+                    <button class="btn btn-sm btn-secondary sample-sql" data-sql="SELECT * FROM defaulter_list;">Defaulters</button>
+                </div>
+
+                <div class="sql-editor-container">
+                    <textarea id="sqlInput" class="sql-textarea" rows="4">SELECT * FROM student;</textarea>
+                    <button class="btn btn-primary" id="runSqlBtn">▶ Execute Query</button>
+                </div>
+
+                <div class="query-result-box">
+                    <h3>Query Results</h3>
+                    <div class="table-responsive">
+                        <table class="data-table" id="sqlResultTable">
+                            <thead id="sqlResultHead"></thead>
+                            <tbody id="sqlResultBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Faculty Switch Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>👨‍🏫 Teacher Sign In</h3>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Select Quick Profile or Enter Credentials:</label>
+                    <select id="quickFacultySelect" class="form-control mb-3">
+                        <option value="FAC101|prof_ramesh@123">Dr. Ramesh Sharma (CS) - FAC101</option>
+                        <option value="FAC102|sunita_p#2024">Prof. Sunita Patil (IT) - FAC102</option>
+                        <option value="FAC103|arvind_v$89">Dr. Arvind Verma (CS) - FAC103</option>
+                        <option value="FAC104|priya_nair!99">Prof. Priya Nair (EC) - FAC104</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="loginFacultyId">Faculty ID / Login ID:</label>
+                    <input type="text" id="loginFacultyId" class="form-control" value="FAC101">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password:</label>
+                    <input type="password" id="loginPassword" class="form-control" value="prof_ramesh@123">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelLoginBtn">Cancel</button>
+                <button class="btn btn-primary" id="confirmLoginBtn">Sign In</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "caams-dbms",
+  "version": "2.0.0",
+  "description": "CAAMS - College Academic & Attendance Management System. Terminal-based DBMS mini-project (SQLite + Node.js) covering the complete DBMS syllabus: ER model, relational algebra, SQL, normalization, indexing & hashing, transactions & recovery.",
+  "main": "src/app.js",
+  "bin": { "caams": "src/app.js" },
+  "scripts": {
+    "start": "node src/app.js",
+    "reset": "node -e \"require('./src/db/init').resetDatabase(); console.log('Database rebuilt: data/college.db')\"",
+    "export-sql": "node -e \"console.log('Written', require('./src/modules/labAssignments').exportSql())\"",
+    "test": "node --test tests/"
+  },
+  "engines": { "node": ">=22.16.0" },
+  "keywords": ["dbms", "sqlite", "sql", "normalization", "b+tree", "transactions", "terminal", "college"],
+  "license": "MIT",
+  "type": "commonjs"
+}
